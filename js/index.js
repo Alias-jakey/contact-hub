@@ -34,7 +34,7 @@ let bgColors = {
     School : "yellow-bg",
     Other : "gray-bg"
 };
-let regExps = [/^[A-Z a-z]{2,50}$/ ,/01[0-25][0-9]{8}$/ , /\w+(@gmail\.com|@yahoo\.com)$/ ]
+let regExps = [/^[A-Z a-z]{2,50}$/ ,/^01[0-25][0-9]{8}$/ , /\w+@(gmail|yahoo|hotmail)\.com$/ ]
 if(localStorage.getItem("contacts") != "[]" && localStorage.getItem("contacts") != null){
     contactList = JSON.parse(localStorage.getItem("contacts"))
     addContact(contactList)
@@ -64,6 +64,7 @@ function clearInput(){
     avatarUpload.value = ""
     modalTitle.innerHTML = "Add New Contact"
     editBtn.classList.add("d-none")
+    submitBtn.classList.remove("d-none")
     submitBtn.removeAttribute("data-bs-dismiss" )
     editBtn.removeAttribute("data-bs-dismiss")
     contactNameError.classList.add("d-none")
