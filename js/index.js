@@ -114,6 +114,19 @@ function emoticons(keyword){
         });
         return false
     }
+    for(let i =0;i<contactList.length;i++){
+        console.log(uTel.value)
+        console.log(contactList[i].tel);
+        console.log(editBtn.getAttribute("data-bs-dismiss"))
+        if(uTel.value == contactList[i].tel && editBtn.getAttribute("data-bs-dismiss") != "modal"){
+            Swal.fire({
+        title: "Duplicate phone Number",
+        text: `A contact with this phone number already exists: ${contactList[i].name}`,
+        icon: "error"
+        });
+            return false
+        }
+    }
     return true
 };
 function addImage(){
@@ -444,12 +457,8 @@ function validate(e){
         submitBtn.removeAttribute("data-bs-dismiss")
         editBtn.removeAttribute("data-bs-dismiss")
     }
-    let temp = contactList
-    if(editBtn.getAttribute("custom-index") != null){
-        temp.splice(editBtn.getAttribute("custom-index"),1)
-    }
-    for(let i=0;i<temp.length;i++){
-        if(uTel.value == temp[i].tel){
+    for(let i=0;i<contactList.length;i++){
+        if(uTel.value == contactList[i].tel){
             submitBtn.removeAttribute("data-bs-dismiss")
             editBtn.removeAttribute("data-bs-dismiss")
         }
