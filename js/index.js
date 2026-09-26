@@ -66,13 +66,13 @@ function clearInput(){
     editBtn.classList.add("d-none")
     submitBtn.classList.remove("d-none")
     submitBtn.removeAttribute("data-bs-dismiss" )
-    editBtn.removeAttribute("data-bs-dismiss")
+    editBtn.setAttribute("data-bs-dismiss" , "modal")
     contactNameError.classList.add("d-none")
     contactPhoneError.classList.add("d-none")
     contactEmailError.classList.add("d-none")
 
 };
-function swal(){
+function emoticons(keyword){
     if(uName.value == ""){
         Swal.fire({
         title: "Missing Name",
@@ -105,16 +105,7 @@ function swal(){
         });
         return false
     }
-    for(let i=0;i<contactList.length;i++){
-        if(uTel.value == contactList[i].tel){
-            Swal.fire({
-                title: "Duplicate Phone Number",
-                text: `A contact with this phone number already exists: ${contactList[i].name}`,
-                icon: "error"
-            });
-            return false
-        }
-    }
+
     if(!(regExps[2].test(uEmail.value)) && uEmail.value != "" ){
         Swal.fire({
         title: "Invalid Email",
@@ -124,13 +115,13 @@ function swal(){
         return false
     }
     return true
-}
+};
 function addImage(){
     avatarDefaultIcon.classList.add("d-none");
     uAvatar.style.backgroundImage = `url(./img/${avatarUpload.files[0].name}`;
 }
 function createContact(){
-    let bool =swal()
+    let bool = emoticons()
     if(!(bool)){return}
     let contact = {
             name : uName.value,
@@ -145,11 +136,18 @@ function createContact(){
         }
         contactList.push(contact)
         addContact(contactList)
+            Swal.fire({
+  icon: "success",
+  title: "Added",
+  text: `Your contact has been added successfully`,
+  showConfirmButton: false,
+  timer: 1500
+});
 }
 function addContact(List){
         contactContainer.innerHTML = ""
         let box = ""
-        for(let i =0;i<contactList.length;i++){
+        for(let i =0;i<List.length;i++){
             let contact = List[i]
             box +=`<div  class="col-md-6 col-lg-12 col-xl-6 mb-4">
                             <div class="contact-card">
@@ -204,7 +202,7 @@ function addContact(List){
                                             <i class="fas fa-phone"></i>
                                         </a>
 
-                                        <a class="action-button email" id="emailBtn" title="Email">
+                                        <a class="action-button email" id="emailBtn" title="Email" href="mailto:${contact.email}">
                                             <i class="fas fa-envelope"></i>
                                         </a>
                                     </div>
@@ -218,7 +216,7 @@ function addContact(List){
                                         <button class="action-button edit" id="editBtn" title="Edit" data-bs-toggle="modal" data-bs-target="#contactModal" onclick="openContact(${i})">
                                             <i class="fas fa-pen"></i>
                                         </button>
-                                        <button class="action-button delete"id="deleteBtn" title="Delete" onclick="deleteContact(${i})">
+                                        <button class="action-button delete"id="deleteBtn" title="Delete" onclick="deleteConfirmation(${i})">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -323,6 +321,25 @@ function emergency(i){
     containers("emergency")
     addContact(contactList);  
 }
+function deleteConfirmation(i){
+    Swal.fire({
+  title: "Are you sure?",
+  text: "You won't be able to revert this!",
+  icon: "warning",
+  showCancelButton: true,
+  confirmButtonColor: "#3085d6",
+  cancelButtonColor: "#d33",
+  confirmButtonText: "Yes, delete it!"
+}).then((result) => {
+  if (result.isConfirmed) {
+    deleteContact(i)
+    Swal.fire({
+    title: "Deleted!",
+    text: "Your file has been deleted.",
+    icon: "success"
+  })};
+});
+}
 function deleteContact(i){
     favouriteList = []
     emergencyList = []
@@ -369,7 +386,7 @@ function openContact(i){
     editBtn.setAttribute("custom-index" , i)
 }
 function editContact(){
-    let bool =swal()
+    let bool =emoticons("edit")
     if(!(bool)){return}
     let i= editBtn.getAttribute("custom-index");
     let contact = contactList[i]
@@ -386,7 +403,13 @@ function editContact(){
     emergencyList = []
     addContact(contactList)
     clearInput()
-    console.log(favouriteList)
+    Swal.fire({
+        icon: "success",
+        title: "Updated",
+        text: `Your contact has been Updated successfully`,
+        showConfirmButton: false,
+        timer: 1500
+});
 }
 function searchContacts(){
     let matches = []
@@ -421,10 +444,14 @@ function validate(e){
         submitBtn.removeAttribute("data-bs-dismiss")
         editBtn.removeAttribute("data-bs-dismiss")
     }
-    for(let i=0;i<contactList.length;i++){
-        if(uTel.value == contactList[i].tel){
+    let temp = contactList
+    if(editBtn.getAttribute("custom-index") != null){
+        temp.splice(editBtn.getAttribute("custom-index"),1)
+    }
+    for(let i=0;i<temp.length;i++){
+        if(uTel.value == temp[i].tel){
             submitBtn.removeAttribute("data-bs-dismiss")
             editBtn.removeAttribute("data-bs-dismiss")
         }
     }
-}
+}console.log(contactList)
