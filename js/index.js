@@ -35,11 +35,9 @@ let bgColors = {
     Other : "gray-bg"
 };
 let regExps = [/^[A-Z a-z]{2,50}$/ ,/^01[0-25][0-9]{8}$/ , /\w+@(gmail|yahoo|hotmail)\.com$/ ]
-if(localStorage.getItem("contacts") != "[]" && localStorage.getItem("contacts") != null){
-    contactList = JSON.parse(localStorage.getItem("contacts"))
-    addContact(contactList)
-}else{
-    contactContainer.innerHTML = `<div class="col-12 text-center py-5">
+function checkEmpty(){
+    if(contactList.length == 0){
+        contactContainer.innerHTML = `<div class="col-12 text-center py-5">
                             <div class="d-flex align-items-center justify-content-center mx-auto mb-4 bg-secondary-subtle
                                      rounded-4" style="width: 80px; height: 80px;">
                                 <i class="fas fa-address-book text-secondary fs-4"></i>
@@ -49,6 +47,25 @@ if(localStorage.getItem("contacts") != "[]" && localStorage.getItem("contacts") 
                                 Click <strong>"Add Contact"</strong> to get started
                             </p>
                         </div>`
+    }
+    if(favouriteList.length == 0){
+                 favouritesContainer.innerHTML = `                                    <div id="emptyStateFav" class="empty-state">
+                                        <p class="text-muted mb-0">No favorites yet</p>
+                                    </div>`
+    }
+    if(emergencyList.length == 0){
+        emergenciesContainer.innerHTML = `                                    <div class="col-12">
+                                    <div id="emptyStateEmergency" class="empty-state">
+                                        <p class="text-muted mb-0">No emergency contacts</p>
+                                    </div>
+                                </div>`
+    }
+}
+if(localStorage.getItem("contacts") != "[]" && localStorage.getItem("contacts") != null){
+    contactList = JSON.parse(localStorage.getItem("contacts"))
+    addContact(contactList)
+}else{
+    checkEmpty()
 }
 function clearInput(){
     uAvatar.style.backgroundImage = "linear-gradient(135deg, var(--accent-blue), var(--blue-600))"
@@ -115,9 +132,6 @@ function emoticons(keyword){
         return false
     }
     for(let i =0;i<contactList.length;i++){
-        console.log(uTel.value)
-        console.log(contactList[i].tel);
-        console.log(editBtn.getAttribute("data-bs-dismiss"))
         if(uTel.value == contactList[i].tel && editBtn.getAttribute("data-bs-dismiss") != "modal"){
             Swal.fire({
         title: "Duplicate phone Number",
@@ -145,7 +159,8 @@ function createContact(){
             group : uGroup.selectedOptions[0].innerHTML,
             favourite : uFavourite.checked,
             emergency : uEmergency.checked,
-            notes : uNotes.value
+            notes : uNotes.value,
+            customId : contactList.length
         }
         contactList.push(contact)
         addContact(contactList)
@@ -226,10 +241,10 @@ function addContact(List){
                                         <button class="action-button emergency"id="emergncyBtn" title="Emergency" onclick="emergency(${i})">
                                             <i class="${contact.emergency ? "rose-500-bg rose-500-text fa-solid fa-heart-pulse" : "far fa-heart"}"></i>
                                         </button>
-                                        <button class="action-button edit" id="editBtn" title="Edit" data-bs-toggle="modal" data-bs-target="#contactModal" onclick="openContact(${i})">
+                                        <button class="action-button edit" id="editBtn" title="Edit" data-bs-toggle="modal" data-bs-target="#contactModal" onclick="openContact(${contact.customId})">
                                             <i class="fas fa-pen"></i>
                                         </button>
-                                        <button class="action-button delete"id="deleteBtn" title="Delete" onclick="deleteConfirmation(${i})">
+                                        <button class="action-button delete"id="deleteBtn" title="Delete" onclick="deleteConfirmation(${contact.customId})">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -272,11 +287,7 @@ function containers(keyword){
                             </div>`
                     }
                 favouritesContainer.innerHTML = x
-                if(favouriteList.length == 0){
-                 favouritesContainer.innerHTML = `                                    <div id="emptyStateFav" class="empty-state">
-                                        <p class="text-muted mb-0">No favorites yet</p>
-                                    </div>`
-                } 
+                checkEmpty() 
             return
             case "emergency":
                 let y = ""
@@ -298,13 +309,7 @@ function containers(keyword){
                                     </div>`
             }
             emergenciesContainer.innerHTML = y
-            if(emergencyList.length == 0){
-        emergenciesContainer.innerHTML = `                                    <div class="col-12">
-                                    <div id="emptyStateEmergency" class="empty-state">
-                                        <p class="text-muted mb-0">No emergency contacts</p>
-                                    </div>
-                                </div>`
-    }
+            checkEmpty()
             return
         }
 }
@@ -358,18 +363,9 @@ function deleteContact(i){
     emergencyList = []
     contactList.splice(i , 1)
     addContact(contactList)
-    if(contactList.length ==0){
-        contactContainer.innerHTML = `<div class="col-12 text-center py-5">
-                            <div class="d-flex align-items-center justify-content-center mx-auto mb-4 bg-secondary-subtle
-                                     rounded-4" style="width: 80px; height: 80px;">
-                                <i class="fas fa-address-book text-secondary fs-4"></i>
-                            </div>
-                            <p class="text-muted fw-semibold mb-1">No contacts found</p>
-                            <p class="text-secondary small">
-                                Click <strong>"Add Contact"</strong> to get started
-                            </p>
-                        </div>`
-    }
+    if(searchInput.value != ""){searchContacts()}
+    checkEmpty()
+
 }
 function openContact(i){
     modalTitle.innerHTML = "Edit Contact";
@@ -416,6 +412,7 @@ function editContact(){
     emergencyList = []
     addContact(contactList)
     clearInput()
+    if(searchInput.value != ""){searchContacts()}
     Swal.fire({
         icon: "success",
         title: "Updated",
@@ -433,6 +430,18 @@ function searchContacts(){
         }
     }
     addContact(matches)
+    if(matches.length == 0){
+        contactContainer.innerHTML = `<div class="col-12 text-center py-5">
+                            <div class="d-flex align-items-center justify-content-center mx-auto mb-4 bg-secondary-subtle
+                                     rounded-4" style="width: 80px; height: 80px;">
+                                <i class="fas fa-address-book text-secondary fs-4"></i>
+                            </div>
+                            <p class="text-muted fw-semibold mb-1">No contacts found</p>
+                            <p class="text-secondary small">
+                                Try using another search term
+                            </p>
+                        </div>`
+    }
 }
 function validate(e){
     if(e.id == "contactName" && e.value != "" && !(regExps[0].test(e.value))){
@@ -458,9 +467,9 @@ function validate(e){
         editBtn.removeAttribute("data-bs-dismiss")
     }
     for(let i=0;i<contactList.length;i++){
-        if(uTel.value == contactList[i].tel){
+        if(uTel.value == contactList[i].tel && i != contactList[i].customId){
             submitBtn.removeAttribute("data-bs-dismiss")
             editBtn.removeAttribute("data-bs-dismiss")
         }
     }
-}console.log(contactList)
+}
